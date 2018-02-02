@@ -1,0 +1,40 @@
+---
+# tasks for sysdev.ansible
+- name: Install require packages
+  become: true
+  yum: name={{item}} state=present update_cache=yes
+  with_items:
+    - git
+    - make
+    - gcc
+    - python-devel
+    - libffi-devel
+    - openssl-devel
+    - epel-release
+    - python-sphinx
+- name: Add python-pip
+  command: yum -y install python-pip
+  changed_when: false
+- name: Update python-pip
+  command:  pip install --upgrade pip 
+  changed_when: false
+- name: install setuptools
+  command:  pip install --upgrade setuptools
+  changed_when: false
+- name: install ansible git repo
+  git: repo=git://github.com/ansible/ansible.git dest:/tmp update=yes
+- name: change dir
+  chdir: /tmp/ansible 
+- name: checkout version 2.4
+  command: git checkout stable-2.4
+- name: number of proc
+  command: nproc
+  register: number_of_proc
+- name: make ansible 
+  command: make -j{{ number_of_proc.stdout }}
+- name: install ansible
+  become: true
+  command: make install 
+
+
+
